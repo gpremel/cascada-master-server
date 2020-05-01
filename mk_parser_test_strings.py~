@@ -1,0 +1,39 @@
+#!/usr/bin/env python3
+
+import numpy as np
+
+n = 1000 	# on génère n lignes pour tester le parser
+
+p_quote = 2
+p_espace = 5
+p_mot_dico = 5
+
+p_tot = p_quote+p_espace+p_mot_dico
+
+with open("wordlist.txt") as f:
+	lines = f.read().splitlines()
+l = []
+
+for i in range(n):
+	nmots_ligne = int(np.abs(np.random.normal(6, 2)))
+	j = 0
+	cur_l = []
+	while j <= nmots_ligne:
+		x = np.random.randint(1, p_tot+1)
+		if x <= p_quote:
+			cur_l.append("\"")
+		elif p_quote < x <= p_espace+p_quote:
+			cur_l.append(" ")
+		else:
+			if j == nmots_ligne:
+				break
+			else:
+				cur_l.append(np.random.choice(lines))
+				cur_l.append(" ")
+			j += 1
+	l.append("".join(cur_l))
+
+with open("out.txt", 'w') as f:
+	for ligne in l:
+		f.write(ligne+"\n")
+		
