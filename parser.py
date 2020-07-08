@@ -7,8 +7,6 @@ import shvars
 
 
 
-contexte_variables = shvars.VarJar()
-
 TESTMODE = False  # utilisé pour les tests unitaires
 
 def set_testing_mode(test_mode):
@@ -162,6 +160,182 @@ class ScriptCommand():
 
 class CmdError(Exception):
     """Erreur générique d'execution de la commande"""
+
+class ListeLiee():
+    
+    def __init__(self, liste):
+        # dernier_noeud = None
+        # for l in liste:
+        #     if dernier_noeud is None:  # on n'a pas encore alloué de noeud
+        #         self.debut = [l, None]
+        #         dernier_noeud = debut
+        #     else:
+        #         courant = [l, None]
+        #         dernier_noeud[1] = courant
+        #         dernier_noeud = courant
+        
+        
+        self.pl = None  # pointeur de lecture
+        self.debut = None  # debut de la chaîne
+
+        self.inserer(liste)  # on insère la liste qui nous permet d'initialiser le tout...
+        self.debut = self.pl
+    
+
+    def lire(self):
+        return self.pl[0]
+    
+    def inserer(self, nliste): # mode='avant'):
+        """Permet d'insérer le contenu de nliste immediatement après pl
+                        pl                      pl
+                [l-1] - [l] - [l+1] -> [l-1] - [l] - [nliste1] - ... - [nlistep] - [pl+1]"""
+        deb_nliste = None
+        dernier_noeud = None
+        
+        for l in nliste:
+            if dernier_noeud is None:  # on n'a pas encore alloué de noeud
+                deb_nliste = [l, None]
+                dernier_noeud = deb_nliste
+            else:
+                courant = [l, None]
+                dernier_noeud[1] = courant
+                dernier_noeud = courant
+
+        if self.pl is not None:
+            ancien_suivant = self.pl[1]
+        else:
+            ancien_suivant = None
+
+        if self.pl is None:   # survient lors de l'initialisation par exemple
+            self.pl = deb_nliste
+        else:
+            self.pl[1] = deb_nliste
+
+
+        if len(nliste) > 0:
+            dernier_noeud[1] = ancien_suivant
+
+    def suivant(self, pas_inc=False):
+        """Permet d'accéder à l'élément suivant dans la liste
+        Si pas_inc est a vrai, pl n'est pas incrémenté
+        Renvoie un tuple:
+            [0]: le contenu de la liste
+            [1]: True si on est à la fin de la liste, False sinon"""
+        if self.pl is None:
+            return None, True
+        elif pas_inc:
+            return self.pl[1][0], False
+        else:
+            self.pl = self.pl[1]
+            if self.pl is None:
+                return None, True
+            else:
+                return self.pl[0], False
+
+    
+    def goto(self, nouveau_pl):
+        """Permet de changer pl à une valeur arbitraire (potentiellement dangereux)"""
+        self.pl = nouveau_pl
+    
+    def rembobiner(self):
+        """Permet de ramener la liste liée à son état initial"""
+        self.goto(self.debut)
+
+    # def __iter__(self):
+    #     return self
+
+    # def __next__(self):
+    #     a = self.suivant()
+    #     if a[1]:
+    #         raise StopIteration
+    #     else:
+    #         return a[0]
+
+    def __str__(self):
+        ancien_pl = self.pl
+        self.rembobiner()
+        l = self.lire()
+        continuer = True
+        est_debut = True
+        s = ""
+        while continuer is True:
+            s += "{}{}".format("" if est_debut else " -> ", l)
+            if est_debut:
+                est_debut = False
+            l, continuer = self.suivant()
+            continuer = not continuer  # la fonction self.suivant() renvoie True si est arrivé à la fin de la chaîne
+        self.goto(ancien_pl)
+        return s
+    
+    # def __repr__(self):
+    #     return self.__str__()
+
+
+    
+
+
+class FlowRunner():
+    def __init__(self, *args, **kwargs):
+        self.recuperer_ligne_suivante = None
+        self.labels = {}   # les labels pour les gotos
+        self.mode = None
+        self.fin_prog_atteinte = False
+
+        if not "src" in kwargs:
+            print("Pas de source founie. Lecture de stdin")
+            self.recuperer_ligne_suivante = self._recup_stdin
+            self.src = ListeLiee([])
+            self.mode = 'stdin'
+        else:
+            liste_src_compilee = []
+            for i in range(len(kwargs["src"])):
+                liste_src_compilee.append(tokeniserLigne(parser_ligne(kwargs["src"][i], i+1)))
+            self.src = ListeLiee(liste_src_compilee)
+            self.recuperer_ligne_suivante = self._recup_src
+            self.mode = 'src'
+
+    def _recup_stdin(self):
+        s =  input("> ")
+        a = tokeniserLigne(parser_ligne(s, "-"))
+        self.src.inserer(a)
+        return a, False
+
+    
+    def _recup_src(self):
+        return self.src.suivant()
+
+
+    def enregistrer_label(self, nom):
+        if nom in self.labels and self.labels[nom] is not self.src.pl:
+            raise ValueError("Un label est déjà présent !")
+        else:
+            self.labels[nom] = self.src.pl
+    
+    def goto_label(self, nom):
+        if nom not in self.labels:
+            raise ValueError("Clef pour le goto non renseignée !")
+        else:
+            jp = self.labels[nom]
+            self.src.goto(jp)       # là on est sur la ligne où l'on définit le label
+            self.src.suivant()      # on va à la ligne suivante
+
+    def end(self):
+        self.fin_prog_atteinte = True
+
+    def run(self):
+        if self.fin_prog_atteinte:    # utilisé si une commande tiere veut mettre fin à l'execution
+            return 
+
+        l, self.fin_prog_atteinte = self.recuperer_ligne_suivante()
+
+        if self.fin_prog_atteinte:   # utilisé quand on est à la fin de la source
+            return
+        try:
+            exec_ligne(l)
+        except Exception as ve:
+            print("E] {}".format(ve))
+
+
 
 
 def parser_ligne(strligne, num_ligne=None):
@@ -349,6 +523,20 @@ def ge(*args):
     """Affiche True si le premier argument est plus grand ou égal au deuxième"""
     print(args[1].valeur >= args[2].valeur)
 
+
+def inc(*args):
+    """Incremente la variable donnée en entrée"""
+    var = contexte_variables.acceder_variable(args[1].valeur)
+    var.valeur = var.valeur + var.type(1)
+
+def add(*args):
+    """Ajoute deux valeurs"""
+    return args
+
+def exec_end(*args):
+    """Termine l'execution"""
+    #flow_exec.
+
 ScriptCommand("echo", echo, [[]])
 ScriptCommand("dir", dir, [[]])
 ScriptCommand("let", let, [[Token(TokenEnum.VTY), Token(TokenEnum.TXT), Token(TokenEnum.OPR, '='), Token(TokenEnum.ANY)]])
@@ -358,6 +546,8 @@ ScriptCommand("lscmd", lscmd, [[]])
 ScriptCommand("ldi", ldi, [[[Token(TokenEnum.VAR), Token(TokenEnum.TXT)], Token(TokenEnum.ANY)], 
                             [[Token(TokenEnum.VAR), Token(TokenEnum.TXT)], Token(TokenEnum.OPR, '='), Token(TokenEnum.ANY)]])
 ScriptCommand("ge", ge, [[Token(TokenEnum.NUM), Token(TokenEnum.NUM)]])
+ScriptCommand("inc", inc, [[Token(TokenEnum.VAR)]])
+#ScriptCommand("add", add, [[[Token(TokenEnum.NUM), Token(TokenEnum.VAR)], ])
 
 liste_cmds = ScriptCommand.liste_commandes #{"echo": ScriptCommand("echo", echo), "dir": ScriptCommand("dir", dir), "let": ScriptCommand("let", let),
               #"examine": ScriptCommand("examine", examine), "bind": ScriptCommand("bind", bind)}
@@ -391,6 +581,13 @@ def exec_ligne(tokenliste):
 
 
 
+    
+    
+contexte_variables = shvars.VarJar()
+#flow_exec          = FlowRunner()
+
+
+
 
 
 
@@ -398,11 +595,27 @@ if __name__ == '__main__':
 
     continuer = True
 
-    while continuer:
-        s = input("> ")
+    # A = ListeLiee(["pomme", "poire", "banane", "pastèque"])
+    # print(A)
+    # A.suivant()
+    # A.inserer(["tomate", "choux", "carrote"])
+    # print(A)
+    # print(A.suivant(pas_inc=True)[0])
+    # print(A.suivant()[0])
+    # print(A.suivant()[0])
+    # exit(0)
+
+    lignes = ["int64 a = 17051999", "inc a", "examine a"]
+    flow_exec          = FlowRunner(src=lignes)
+    flow_exec.run()
+    exit(0)
+
+    #while continuer:
+    for l in lignes: 
+        s = l#input("> ")
         try:
             a = parser_ligne(s, num_ligne="-") #"dir \"test2\" 3 3.141592  -4   \"a#\"   abc")
-            print(a)
+            #print(a)
         except ParseError as pe:
             print(pe)
             continue

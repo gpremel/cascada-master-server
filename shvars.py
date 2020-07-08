@@ -10,6 +10,15 @@ class CscType():
         self.nom            = nom
         self.constructeur   = constructeur 
 
+    def __call__(self, *args, **kwargs):
+        return self.constructeur(*args, **kwargs)
+
+    def __str__(self):
+        return self.nom
+    
+    def __repr__(self):
+        return self.__str__()
+
 class CscVar():
     """Une variable générique de cascada"""
     def __init__(self, type, valeur):
