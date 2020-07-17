@@ -53,8 +53,6 @@ class csc_printing_expanded(object):
     des propriétés d'affichage à d'autres types
     NE DOIT PAS ÊTRE INSTANCIÉE DIRECTEMENT"""
 
-    def __init__(self):
-        self.value = None
 
     def __str__(self):
         return str(self.value) #"{}({})".format(self.__class__.__name__, self.value)
@@ -62,27 +60,94 @@ class csc_printing_expanded(object):
     def __repr__(self):
         return self.__str__()
 
+class csc_SQL_expanded(object):
+    """Classe qui n'implémente qu'une unique fonction, qui vise à offrir une
+    interopérabilité entre cascada et SQL"""
+    @staticmethod
+    def to_SQL_type():
+        return "BLOB"
+
+
     
-class csc_uint64(ctypes.c_uint64, csc_arithm_expanded, csc_printing_expanded):
-    pass
+class csc_uint64(csc_printing_expanded, ctypes.c_uint64, csc_arithm_expanded, csc_SQL_expanded):
+    @staticmethod
+    def to_SQL_type():
+        return "BIGINT(20) UNSIGNED"
+    
+    def __init__(self, value):
+        if not isinstance(value, int):
+            ctypes.c_uint64.__init__(self, int(value))
+        else:
+            ctypes.c_uint64.__init__(self, value)
 
-class csc_int64(ctypes.c_int64, csc_arithm_expanded, csc_printing_expanded):
-    pass
+    
+    
 
-class csc_uint32(ctypes.c_uint32, csc_arithm_expanded, csc_printing_expanded):
-    pass
+class csc_int64(csc_printing_expanded, ctypes.c_int64, csc_arithm_expanded, csc_SQL_expanded):
+    @staticmethod
+    def to_SQL_type():
+        return "BIGINT(20)"
+    
+    def __init__(self, value):
+        if not isinstance(value, int):
+            ctypes.c_int64.__init__(self, int(value))
+        else:
+            ctypes.c_int64.__init__(self, value)
 
-class csc_int32(ctypes.c_uint32, csc_arithm_expanded, csc_printing_expanded):
-    pass
 
-class csc_uint8(ctypes.c_uint8,  csc_arithm_expanded, csc_printing_expanded):
-    pass
 
-class csc_float(ctypes.c_float,  csc_arithm_expanded, csc_printing_expanded):
-    pass
+class csc_uint32(csc_printing_expanded, ctypes.c_uint32, csc_arithm_expanded, csc_SQL_expanded):
+    @staticmethod
+    def to_SQL_type():
+        return "INT(10) UNSIGNED"
+    
+    def __init__(self, value):
+        if not isinstance(value, int):
+            ctypes.c_uint32.__init__(self, int(value))
+        else:
+            ctypes.c_uint32.__init__(self, value)
 
-class csc_double(ctypes.c_double, csc_arithm_expanded, csc_printing_expanded):
-    pass
+
+
+class csc_int32(csc_printing_expanded, ctypes.c_uint32, csc_arithm_expanded, csc_SQL_expanded):
+    @staticmethod
+    def to_SQL_type():
+        return "INT(10)"
+
+    def __init__(self, value):
+        if not isinstance(value, int):
+            ctypes.c_int32.__init__(self, int(value))
+        else:
+            ctypes.c_int32.__init__(self, value)
+
+
+
+
+class csc_uint8(csc_printing_expanded, ctypes.c_uint8,  csc_arithm_expanded, csc_SQL_expanded):
+    @staticmethod
+    def to_SQL_type():
+        return "TINYINT(3) UNSIGNED"
+    
+    def __init__(self, value):
+        if not isinstance(value, int):
+            ctypes.c_uint8.__init__(self, int(value))
+        else:
+            ctypes.c_uint8.__init__(self, value)
+
+
+
+
+class csc_float(csc_printing_expanded, ctypes.c_float, csc_arithm_expanded, csc_SQL_expanded):
+    @staticmethod
+    def to_SQL_type():
+        return "FLOAT"
+
+
+class csc_double(csc_printing_expanded, ctypes.c_double, csc_arithm_expanded, csc_SQL_expanded):
+    @staticmethod
+    def to_SQL_type():
+        return "DOUBLE"
+
 
 
 # def mk_uint64(v):

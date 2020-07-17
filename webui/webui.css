@@ -1,0 +1,132 @@
+/* #top-rect{
+    height:100px;
+    background: #0099ff;
+    color: white;
+    align-items: bottom;
+} */
+
+body{
+    margin: 0px;
+}
+
+.wrapper{
+    position: relative;
+}
+
+#overlay{
+        /* Pour avoir l'overlay, cf https://stackoverflow.com/questions/2941189/how-to-overlay-one-div-over-another-div */
+        position: absolute;
+        top: 0;
+        right: 0;
+
+        background-color: white;
+        height: 100px;
+        min-height: 100px;
+        width: 100%;
+        background-color: rgba(100%, 100%, 100%, 50%);
+}
+
+#overlay > p {
+    display: table-cell;
+    height: 100px;
+    vertical-align: bottom;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 300%;
+    color: white !important;
+    padding-left: 8px;
+    padding-bottom: 4px;
+}
+
+
+nom-projet{
+    font-size: small;
+    margin-left: 10px;
+}
+
+
+/* cf https://codepen.io/P1N2O/pen/pyBNzX, Manuel Pinto*/
+#top-rect{ 
+    background-color: #0099ff;
+    background: repeating-linear-gradient(45deg, #0099ff, #0004ff, #9400D3); /*linear-gradient(45deg, #9400D3, #4B0082, #0000FF, #00FF00, #FFFF00, #FF7F00, #FF0000); */
+	background-size: 400% 400%;
+    animation: gradient 15s ease infinite;
+    height: 100px;
+    min-height: 100px;
+}
+@keyframes gradient {
+	0% {
+		background-position: 0% 50%;
+	}
+	50% {
+		background-position: 100% 50%;
+	}
+	100% {
+		background-position: 0% 50%;
+	}
+}
+
+/*#top-rect > p {
+    display: table-cell;
+    height: 100px;
+    vertical-align: bottom;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 300%;
+    color: white;
+    padding-left: 8px;
+    padding-bottom: 4px;
+}*/
+
+
+
+
+
+.treejs-label{
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: large;
+}
+
+
+.treejs-node{
+    color: black;
+}
+
+
+.treejs-checkbox{
+    display: none !important;
+}
+
+.treejs-node__halfchecked{
+    color: orange;
+}
+
+
+
+.treejs-node__checked{
+    color: red;
+}
+
+
+.treejs-node .treejs-subnode{
+    margin-top: 2px;
+    margin-bottom: 2px;
+}
+
+.treejs-subnode .treejs-label{
+    font-family: Arial, Helvetica, sans-serif;
+    font-size:   small; 
+}
+
+
+footer{
+    position:fixed;
+    bottom:0;
+    background-color: white;
+    width: 100%;
+    text-align: right;
+}
+
+footer > a{
+    padding-right: 3px;
+    text-decoration: none;
+    color: black;
+}

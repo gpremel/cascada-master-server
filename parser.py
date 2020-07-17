@@ -4,7 +4,7 @@ import re
 from enum import Enum
 
 import shvars
-
+import compteur
 
 
 TESTMODE = False  # utilisé pour les tests unitaires
@@ -78,7 +78,9 @@ class Token():
         if self.type == TokenEnum.ANY or autre_token.type == TokenEnum.ANY or \
             (self.est_nombre() and autre_token.type == TokenEnum.NUM) or (self.type == TokenEnum.NUM and autre_token.est_nombre()) or \
                 (self.type == autre_token.type and \
-                     (self.valeur is None or autre_token.valeur is None or self.valeur == autre_token.valeur)):
+                     (self.valeur is None or autre_token.valeur is None or self.valeur == autre_token.valeur)) or \
+                         (self.type == TokenEnum.TXT and autre_token.type == TokenEnum.VAR or \
+                             self.type == TokenEnum.VAR and autre_token.type == TokenEnum.TXT):
             return True
         else:
             return False
@@ -183,7 +185,8 @@ class ListeLiee():
     
 
     def lire(self):
-        return self.pl[0]
+        # Sécurité pour pas planter
+        return None if self.pl is None else self.pl[0]
     
     def inserer(self, nliste): # mode='avant'):
         """Permet d'insérer le contenu de nliste immediatement après pl
@@ -302,7 +305,9 @@ class FlowRunner():
 
     
     def _recup_src(self):
-        return self.src.suivant()
+        res = self.src.lire()
+        self.src.suivant()
+        return res, res is None
 
 
     def enregistrer_label(self, nom):
@@ -320,21 +325,46 @@ class FlowRunner():
             self.src.suivant()      # on va à la ligne suivante
 
     def end(self):
+        """Permet à une commande tierce d'indiquer que le programme doit s'arrêter de tourner au flowrunner
+            Args:
+                self
+            Returns:
+                None
+        """
+        
         self.fin_prog_atteinte = True
 
-    def run(self):
+    def run_step(self):
+        """Permet de récupérer et d'executer une unique instruction
+            Args:
+                self
+            Returns:
+                bool: True s'il reste des intructions à executer, False sinon
+        """
+
         if self.fin_prog_atteinte:    # utilisé si une commande tiere veut mettre fin à l'execution
-            return 
+            return False
 
         l, self.fin_prog_atteinte = self.recuperer_ligne_suivante()
 
         if self.fin_prog_atteinte:   # utilisé quand on est à la fin de la source
-            return
+            return False
         try:
             exec_ligne(l)
         except Exception as ve:
             print("E] {}".format(ve))
+        return True
 
+    def run(self):
+        """Fait tourner le programme
+            Args:
+                self
+            Returns
+                None
+        """
+
+        while self.run_step():
+            pass
 
 
 
@@ -595,6 +625,8 @@ if __name__ == '__main__':
 
     continuer = True
 
+
+
     # A = ListeLiee(["pomme", "poire", "banane", "pastèque"])
     # print(A)
     # A.suivant()
@@ -608,6 +640,12 @@ if __name__ == '__main__':
     lignes = ["int64 a = 17051999", "inc a", "examine a"]
     flow_exec          = FlowRunner(src=lignes)
     flow_exec.run()
+
+    a = compteur.CompteurLogRange(1, 100, 2)
+    while continuer:
+        s, continuer = a.incremente()
+        if continuer: print(s)
+
     exit(0)
 
     #while continuer:

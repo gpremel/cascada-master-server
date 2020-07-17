@@ -1,0 +1,124 @@
+<html>
+    <head>
+        <title>Gestion de cascada</title>
+        <meta charset='utf-8'>
+        <link rel="icon" type="image/png" href="images/favicon.png">
+        <link rel="stylesheet" type="text/css" href="webui.css">
+    	<link rel="stylesheet" href="menu.css" type="text/css">
+	    <link rel="stylesheet" href="TreeJS.css" type="text/css">
+
+        <script type="text/javascript" src="TreeJS.js"></script>
+
+    </head>
+
+    <body>
+        <div class="wrapper">
+            <div id="top-rect">
+            </div>
+            <div id="overlay">
+                <p>Cascada <nom-projet></nom-projet> </p>
+            </div>
+        </div>
+
+
+        <div id="arborescence-placement">
+        </div>
+
+        <footer class="osack">
+            <a href='osack.html'>Licenses opensource</a>
+        </footer>
+
+
+    </body>
+
+
+    <script>
+
+
+        var template = {
+                className: 'arborescence',
+                disableHeader: false,
+                defaultLeafType: 'DefaultLeafType',
+
+                columns: {
+                        name: {
+                                title: 'Nom'
+                        },
+                        statut: {
+                                title: 'Statut',
+                                defaultValue: 'INACTIF',
+                                noescape: true
+                        },
+                        tache: {
+                                title: 'Tâche'
+                        }
+                    }
+                };
+
+        var arbre = new TreeJS(template)
+        arbre.appendTo(document.getElementById('arborescence-placement'));
+
+
+
+        function majArbre(){
+            let xhr = new XMLHttpRequest();
+            xhr.open("GET", '/api/v1/sysinfo');
+            xhr.responseType = "json";
+            xhr.send();
+
+            xhr.onload = function(){    // on met à jour l'arbre
+                let ans = xhr.response;
+                nom_projet = ans["nomprojet"]
+                d = document.querySelector("nom-projet") 
+                d.innerHTML = nom_projet   
+            
+
+                ans = ans["unites"]
+
+                let r = {};
+                for(var m in ans){
+                    r[m+'/'] = {'name': m, 'statut': '-'};
+                    for(var n in ans[m]){
+                        r[m+'/'+ans[m][n]["nom"]] = {'name': ans[m][n]["nom"], 'statut': code_statut_noeud_vers_str(ans[m][n]["statut"]), 'tache': ans[m][n]["tache"]};
+                    }
+                }
+                arbre.update(r);
+            }
+        }
+
+        function code_statut_noeud_vers_str(code){
+            switch(code){
+                case 0:
+                    return "INACTIF";
+                case 2:
+                    return "MORT";
+                case 3:
+                    return "PAUSE";
+                case 4:
+                    return "ACTIF";
+                default:
+                    return "N/D";
+            }
+        }
+
+        function code_statut_maitre_vers_str(code){
+            switch(code){
+                case 0:
+                    return "NON_CONNECTE";
+                case 1:
+                    return "CONNECTE";
+                case 2:
+                    return "TIMEOUT";
+            }
+        }
+
+
+        majArbre();
+        setInterval(majArbre, 10000);
+
+        //afficherArbre();
+        //setInterval(afficherArbre, 1000000);
+
+    </script>
+
+</html>

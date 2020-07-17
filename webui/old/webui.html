@@ -1,0 +1,57 @@
+<html>
+    <head>
+        <title>Gestion de cascada</title>
+        <meta charset='utf-8'>
+        <link rel="stylesheet" type="text/css" href="webui.css">
+        <script type="text/javascript" src="tree.js"></script>
+    </head>
+
+    <body>
+        <div id="top-rect">
+            <p>Cascada</p>
+        </div>
+
+        <div class="arborescence">
+        </div>
+    </body>
+
+
+    <script>
+
+        var ancienArbre = null;
+
+        function afficherArbre(){
+            var monArbo = null;
+            let xhr = new XMLHttpRequest();
+            xhr.open("GET", '/api/v1/sysinfo');
+            xhr.responseType = "json";
+            xhr.send();
+
+            xhr.onload = function(){    // on met à jour l'arbre
+                console.log(xhr.response);
+                let ans = xhr.response;
+                let r = [];
+                let maitre = null;
+                for(var m in ans){
+                    maitre = {"id": m, "text": m, "children": []};
+
+                    for(var n in ans[m]){
+                        maitre["children"].push({"id": ans[m][n], "text": ans[m][n]});
+                    }
+                    r.push(maitre);
+                }
+                console.log(r);
+                
+
+
+                monArbo = new Tree('.arborescence', {data: r, closeDepth: 1});    
+                ancienArbre = monArbo;
+
+            }
+        }
+        afficherArbre();
+        setInterval(afficherArbre, 1000000);
+
+    </script>
+
+</html>
