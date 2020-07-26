@@ -11,8 +11,8 @@ ul,li{list-style:none;}
 /* ------------------------------------------ GLOBAL ------------------------------------------ */
 
 html {
-	font-size:11px;
-	font-family:tahoma;
+	/*font-size:11px;*/
+	/*font-family:tahoma;*/
 	background:#f5f5f5;
 }
 
@@ -27,6 +27,8 @@ table {
 	width:100%;
 	border-collapse:collapse;
 	table-layout:fixed;
+	font-size:11px;
+	font-family: Arial, Helvetica, sans-serif;
 	
 	color:#666;
 	font-size:11px;
@@ -136,7 +138,7 @@ table {
 
 
 	tr.arborescence-leaf>td>a.arborescence-DefaultLeafType {
-		background-image:url('images/board-round.png');
+		background-image:url('images/board4.png');
 	}	
 	
 	th.arborescence-name, td.arborescence-name { width:200px; }

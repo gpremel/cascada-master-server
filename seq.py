@@ -99,15 +99,58 @@ class sequenceur():
         
         # enfin, on incrémente pour le tour suivant
         self.indices_courants[0] += 1
+        self.nb_iters_realisees += 1
 
         return sch_sortie
 
+    
+    def reset(self):
+        self.__init__(self.schema, self.schema_compteurs)
+    
+    def recharger_bornes_pas(self, bornes_pas):
+        """Permet de recharger les paramètres de bornes et de pas pour les variables spécifiées dans bornes_pas,
+        utilie pour densifier !
+            Params:
+                bornes_pas (dict): Les clef sont les noms des variables à recharger, les valeurs un triplet:
+                        -> début
+                        -> fin
+                        -> nombre d'itérations
+            
+            Returns:
+                None
+            
+            Notes:
+                Attention, cette fonciton réinitialise le compteur !
+        """
+
+        for n, v in bornes_pas.items():
+            if n in self.schema_compteurs:
+                fct = self.schema_compteurs[n][3]
+                self.schema_compteurs[n] = (v[0], v[1], v[2], fct)
+        self.reset()
+    
+    def nb_iters_pour_variable(self, nom_variable):
+        """Permet d'accéder proprement au nombre d'itération pour chaque variable
+            Params:
+                nom_variable (str): le nom de la variable
+                
+            Returns:
+                object: la valeur de la variable, None si elle n'existe pas"""
+        if nom_variable not in self.schema_compteurs:
+            return None
+        else:
+            return self.schema_compteurs[nom_variable][2]
+
+    
+
 if __name__ == '__main__':
     schema = {"K": csc_float, "E": csc_uint8}
-    schema_compteurs = {"K": (0, 1, 10, np.linspace), "E": (0, 5, 6, np.linspace)} #{"K": range(0, 10), "E": range(0, 5, 1)}
+    schema_compteurs = {"K": (0, 10, 11, np.linspace), "E": (0, 5, 6, np.linspace)} #{"K": range(0, 10), "E": range(0, 5, 1)}
     S = sequenceur(schema, schema_compteurs)
     print(S.nb_iters_total)
-    print(S.indices_courants)
-
-    server.sequenceur = S
-    server.launch()
+    x = S.suivant()
+    while x is not None:
+        print(x)
+        if x['E'].value == 4 and x['K'].value < 30:
+            S.recharger_bornes_pas({'K': (50, 55, 11)})
+        x = S.suivant()

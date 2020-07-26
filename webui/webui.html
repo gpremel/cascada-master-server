@@ -2,7 +2,7 @@
     <head>
         <title>Gestion de cascada</title>
         <meta charset='utf-8'>
-        <link rel="icon" type="image/png" href="images/favicon.png">
+        <link rel="icon" type="image/png" href="images/favicon-round.png">
         <link rel="stylesheet" type="text/css" href="webui.css">
     	<link rel="stylesheet" href="menu.css" type="text/css">
 	    <link rel="stylesheet" href="TreeJS.css" type="text/css">
@@ -20,12 +20,26 @@
             </div>
         </div>
 
+        <div id="erreur-cnx" style="display: none;">
+            <p>Connexion perdue</p>
+        </div>
 
         <div id="arborescence-placement">
         </div>
 
-        <footer class="osack">
-            <a href='osack.html'>Licenses opensource</a>
+        
+        </footer>
+        
+        <footer>
+            <div id="progress-info">
+                    <div id="progressbar">
+                        <div></div>
+                    </div>
+                    <div id="progress-counter"><a class="numerateur"></a> : <a class="denominateur"></a></div>
+            </div>
+            <div id="osack">
+                <a href='osack.html'>Licenses opensource</a>
+            <div></div>
         </footer>
 
 
@@ -66,12 +80,43 @@
             xhr.responseType = "json";
             xhr.send();
 
+
             xhr.onload = function(){    // on met à jour l'arbre
+
+                err = document.querySelector("#erreur-cnx");
+                err.style = "display: none;";
+
                 let ans = xhr.response;
                 nom_projet = ans["nomprojet"]
                 d = document.querySelector("nom-projet") 
                 d.innerHTML = nom_projet   
-            
+
+                barre = document.querySelector("#progressbar div");
+                if("avancement" in ans){
+                    barre.style = "width: "+ ans["avancement"]*100 + "%;";
+                    barre.title = ans["avancement"]*100+"%";
+                } else {
+                    barre.title = "";
+                    barre.style = "display: none;";
+                }
+                
+                progresscounter = document.querySelector("#progress-counter");
+                nume = progresscounter.querySelector(".numerateur");
+                denum = progresscounter.querySelector(".denominateur");
+
+                if("nb_densifcations_effectuees" in ans){
+                    progresscounter.style = "";
+                    nume.innerHTML = ans["nb_densifcations_effectuees"];
+                    if("nb_densifications_totales" in ans){
+                        denum.style = "";
+                        denum.innerHTML = ans["nb_densifications_totales"];
+                    } else {
+                        denum.style = "display: none";
+                    }
+                } else {
+                    progresscounter.style = "display: none";
+                }
+                
 
                 ans = ans["unites"]
 
@@ -83,6 +128,13 @@
                     }
                 }
                 arbre.update(r);
+            }
+
+            xhr.onerror = function(){
+                //arbre.update({});  // on efface l'arbre
+                // On affiche l'erreur
+                err = document.querySelector("#erreur-cnx");
+                err.style = "";
             }
         }
 
@@ -114,7 +166,7 @@
 
 
         majArbre();
-        setInterval(majArbre, 10000);
+        setInterval(majArbre, 3000);
 
         //afficherArbre();
         //setInterval(afficherArbre, 1000000);

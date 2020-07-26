@@ -5,6 +5,10 @@
     align-items: bottom;
 } */
 
+html{
+    font-family: Arial, Helvetica, sans-serif;
+}
+
 body{
     margin: 0px;
 }
@@ -19,11 +23,12 @@ body{
         top: 0;
         right: 0;
 
-        background-color: white;
+        /*background-color: white;*/
         height: 100px;
         min-height: 100px;
         width: 100%;
-        background-color: rgba(100%, 100%, 100%, 50%);
+        background-color: rgba(100%, 100%, 100%, .5);
+
 }
 
 #overlay > p {
@@ -44,11 +49,19 @@ nom-projet{
 }
 
 
+@supports (background: repeating-linear-gradient(45deg, #0099ff, #0004ff, #9400D3)){
+    #top-rect{
+        background: repeating-linear-gradient(45deg, #0099ff, #0004ff, #9400D3);
+        /*linear-gradient(45deg, #9400D3, #4B0082, #0000FF, #00FF00, #FFFF00, #FF7F00, #FF0000);*/
+    }
+}
+
+
+
 /* cf https://codepen.io/P1N2O/pen/pyBNzX, Manuel Pinto*/
 #top-rect{ 
     background-color: #0099ff;
-    background: repeating-linear-gradient(45deg, #0099ff, #0004ff, #9400D3); /*linear-gradient(45deg, #9400D3, #4B0082, #0000FF, #00FF00, #FFFF00, #FF7F00, #FF0000); */
-	background-size: 400% 400%;
+    background-size: 400% 400%;
     animation: gradient 15s ease infinite;
     height: 100px;
     min-height: 100px;
@@ -77,6 +90,36 @@ nom-projet{
 }*/
 
 
+#erreur-cnx{
+    position:fixed;
+    top:50%;
+    left:50%;
+    transform:translate(-50%, -50%);
+    z-index: 1000;
+
+    background-color: rgba(20%, 20%, 20%, 50%);
+    border-radius: 25px;
+    
+    padding-left: 15px;
+    padding-right: 15px;
+
+    padding-top: 20px;
+    padding-bottom: 20px;
+
+}
+
+
+
+#erreur-cnx > p{
+    display: table-cell;
+    vertical-align: middle;
+
+
+    text-align: center;
+    font-size: large;
+    color: white;
+
+}
 
 
 
@@ -122,10 +165,75 @@ footer{
     bottom:0;
     background-color: white;
     width: 100%;
-    text-align: right;
 }
 
-footer > a{
+footer #progress-info{
+    border-bottom-color: #f5f5f5;
+    border-bottom-style: solid;
+    border-bottom-width: 2px;
+    
+    border-top-color: #f5f5f5;
+    border-top-style: solid;
+    border-top-width: 1px;
+
+
+}
+
+#progress-counter{
+    display:table-cell;
+    height: 100%;
+    /*margin-right: 3px;
+    margin-left: 3px;*/
+    border-style: solid;
+    border-bottom-width: 0px;
+    border-top-width: 0px;
+    border-color: #f5f5f5;
+    vertical-align: center;
+
+
+    padding-left: 4px;
+    padding-right: 4px;
+
+    font-size: small;
+}
+
+#progress-counter > .numerateur {
+    color: black;
+}
+
+#progress-counter > .denominateur {
+    color: #646464;
+}
+
+#progressbar {
+    display: table-cell;
+    float: left;
+    vertical-align: center;
+    background-color: #f5f5f5;
+    border-color: gray;
+    border-style: solid;
+    border-width: 1px;
+    width: 150px;
+    padding: 2px;
+    margin: 3px;
+    height: 3px;
+  }
+  
+  #progressbar>div {
+    background-color: #0099ff;
+
+    width: 40%;
+    /* Adjust with JavaScript */
+    height:100%;
+  }
+
+
+footer #osack{
+    text-align: right;
+    font-size: x-small;
+}
+
+footer #osack > a{
     padding-right: 3px;
     text-decoration: none;
     color: black;

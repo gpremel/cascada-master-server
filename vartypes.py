@@ -39,7 +39,7 @@ class csc_arithm_expanded(object):
         return self.value <= other.value
 
     def __ne__(self, other):
-        return not self.__eq__(other.value)
+        return not self.__eq__(other)
 
     def __gt__(self, other):
         return not self.__le__(other)
@@ -140,13 +140,29 @@ class csc_uint8(csc_printing_expanded, ctypes.c_uint8,  csc_arithm_expanded, csc
 class csc_float(csc_printing_expanded, ctypes.c_float, csc_arithm_expanded, csc_SQL_expanded):
     @staticmethod
     def to_SQL_type():
-        return "FLOAT"
+        return "DOUBLE" # "FLOAT" -> pas le choix sinon MariaDB déconne et ne renvoit pas les bonnes valeurs
+    
+    def __init__(self, value):
+        if isinstance(value, float):
+            ctypes.c_float.__init__(self, value)
+        elif isinstance(value, csc_float):
+            ctypes.c_float.__init__(self, value.value)
+        else:
+            ctypes.c_float.__init__(self, float(value))
 
 
 class csc_double(csc_printing_expanded, ctypes.c_double, csc_arithm_expanded, csc_SQL_expanded):
     @staticmethod
     def to_SQL_type():
-        return "DOUBLE"
+        return "DOUBLE" # "DOUBLE"
+   
+    def __init__(self, value):
+        if isinstance(value, value):
+            ctypes.c_double.__init__(self, value)
+        elif isinstance(value, csc_double):
+            ctypes.c_float.__init__(self, value.value)
+        else:
+            ctypes.c_double.__init__(self, float(value))
 
 
 
@@ -192,3 +208,11 @@ def mk_cfloat(v):
 
 def mk_cdouble(v):
     return csc_double(float(v))
+
+
+def caster_depuis_schema(schema, valeurs):
+    res = {}
+    for var, typ in schema.items():
+        if var in valeurs:
+            res[var] = typ(valeurs[var])
+    return res
