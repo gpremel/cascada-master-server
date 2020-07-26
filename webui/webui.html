@@ -92,9 +92,10 @@
                 d.innerHTML = nom_projet   
 
                 barre = document.querySelector("#progressbar div");
+                corps_barre = document.querySelector("#progressbar");
                 if("avancement" in ans){
                     barre.style = "width: "+ ans["avancement"]*100 + "%;";
-                    barre.title = ans["avancement"]*100+"%";
+                    corps_barre.title = Math.round((ans["avancement"]+Number.EPSILON)*10000)/100+"%";
                 } else {
                     barre.title = "";
                     barre.style = "display: none;";
@@ -166,7 +167,7 @@
 
 
         majArbre();
-        setInterval(majArbre, 3000);
+        setInterval(majArbre, 10000);
 
         //afficherArbre();
         //setInterval(afficherArbre, 1000000);

@@ -172,9 +172,13 @@ footer #progress-info{
     border-bottom-style: solid;
     border-bottom-width: 2px;
     
-    border-top-color: #f5f5f5;
+    padding-top: 3px;
+    
+    border-top-color: #bdbdbd;
     border-top-style: solid;
     border-top-width: 1px;
+
+
 
 
 }

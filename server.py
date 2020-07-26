@@ -103,6 +103,10 @@ class noeudCalcul():
                 taches_a_redistribuer.append(self.tache_calcul)
                 self.tache_calcul = None
 
+    def charger_tache(self, tache):
+        self.tache_calcul = tache
+        self.statut = statutNoeud.ACTIF
+
 class clientMaitre():
     def __init__(self, nom, token, keepalive=0, statut=statutClient.NON_CONNECTE):
         self.nom = nom
@@ -119,6 +123,7 @@ class clientMaitre():
         nom_noeud = self.nom+"#"+str(self.nb_noeuds_ajoutes+1)
         self.noeuds[nom_noeud] = noeudCalcul(nom=nom_noeud)
         self.nb_noeuds_ajoutes += 1
+        return nom_noeud
     
     def liste_noeuds(self):
         return [(num, noeud) for num, noeud in self.noeuds.items()]
@@ -140,10 +145,10 @@ def sanitize(no_timeout=False):
     if data is None:
         raise ValueError
 
-    if int(data["mastertoken"]) not in sessions_maitres.keys():
+    if data["mastertoken"] not in sessions_maitres.keys():
         return False, json.dumps({"status": "error", "code": erreursClient.CLEF_MANQUANTE_DANS_TROUSSEAU.value, "msg": "No matching masterkey found in keyring"})
     
-    client = sessions_maitres[int(data["mastertoken"])]
+    client = sessions_maitres[data["mastertoken"]]
     if no_timeout:
         if client.dernier_keepalive + temps_max_keepalive < int(time.time()):   # timeout
             return False, json.dumps({"status": "error", "code": erreursClient.TIMEOUT_RELOGIN.value, "msg": "Timed out. Please relogin"})
@@ -166,19 +171,27 @@ def api_info():
 
 @post('/api/v1/register-master')
 def register_maitre():   # on commence par enregistrer le controlleur
-    clef = request.forms.get('key')
-    nom  = request.forms.get('name') # nom proposé par le client
-    
+
+    res = dict(request.json)
+
+    if res is None:
+        clef = request.forms.get('key')
+        nom  = request.forms.get('name') # nom proposé par le client
+    else:
+        clef = res["key"] if "key" in res else None
+        nom = res["name"] if "name" in res else None
+
+
     nom = "***UNNAMED MASTER***" if nom is None else nom.replace('-', '')
     nom.replace('#', '')
 
     if clef != clef_secrete :
-        return json.dumps({"status": "error", "msg": "Authentification failed", "code": erreursClient.ECHEC_AUTH.value})
+        return {"status": "error", "msg": "Authentification failed", "code": erreursClient.ECHEC_AUTH.value}
     else:
         # on cree un jeton unique pour le maitre
-        token_session = random.randint(0, 2**255-1)
+        token_session = str(random.randint(0, 2**255-1))
         while token_session in sessions_maitres:
-            token_session = random.randint(0, 2**255-1)
+            token_session = str(random.randint(0, 2**255-1))
 
         # on garantit l'unicité du nom
         if nom not in compteur_utilisation_noms:
@@ -187,10 +200,12 @@ def register_maitre():   # on commence par enregistrer le controlleur
             compteur_utilisation_noms[nom] += 1
             nom = nom + "-" + str(compteur_utilisation_noms[nom])
         
-
         sessions_maitres[token_session] = clientMaitre(nom, token_session, keepalive=int(time.time()), statut=statutClient.CONNECTE)
         logging.info("Le client maître {} [{}] s'est connecté".format(nom, request.environ.get('HTTP_X_FORWARDED_FOR') or request.environ.get('REMOTE_ADDR')))
-        return json.dumps({"status": "ok", "msg": "Authentification succeeded", "code": erreursClient.PAS_ERREUR.value, "master_token": token_session, "name": nom})
+        return {"status": "ok", "msg": "Authentification succeeded", "code": erreursClient.PAS_ERREUR.value, "master_token": token_session, "name": nom, "project": {"algo": mon_projet.algo, 
+                                                "name": mon_projet.nom,
+                                                "scheme_in": schema_vers_sch_typecode(mon_projet.schema_entree),
+                                                "scheme_out": schema_vers_sch_typecode(mon_projet.schema_sortie)}}
 
 
 @post('/api/v1/register-nodes')
@@ -205,14 +220,15 @@ def register_nodes():
     if "nodenumber" not in data:
         return json.dumps({"status": "error", "msg": "Missing field \'nodenumber\'", "code": erreursClient.MANQUE_CHAMP_REQUETE.value})
     
-    client = sessions_maitres[int(data["mastertoken"])]
+    client = sessions_maitres[data["mastertoken"]]
     nb_noeuds = int(data["nodenumber"])
-
+    noms_noeuds = []
     for i in range(nb_noeuds):
-        client.ajouter_noeud()
+        noms_noeuds.append(client.ajouter_noeud())
     
     logging.info("Le client maître {} a initialisé {} noeuds".format(client.nom, nb_noeuds))
-    return json.dumps({"status": "ok", "msg": "Successfully initialized {} nodes".format(nb_noeuds), "code": erreursClient.PAS_ERREUR.value})
+    return json.dumps({"status": "ok", "msg": "Successfully initialized {} nodes".format(nb_noeuds), "code": erreursClient.PAS_ERREUR.value,
+                        "nodenames": noms_noeuds})
    
 
 @post('/api/v1/fetch-nodes')
@@ -222,7 +238,7 @@ def disp_nodes():
         return s[1]
     
     data = dict(s[1])
-    client = sessions_maitres[int(data["mastertoken"])]
+    client = sessions_maitres[data["mastertoken"]]
     liste_noeuds = client.liste_noeuds()
     out = []
     for z in liste_noeuds:
@@ -237,7 +253,7 @@ def work4node():
         return s[1]
     
     data = dict(s[1])
-    client = sessions_maitres[int(data["mastertoken"])]
+    client = sessions_maitres[data["mastertoken"]]
 
     if "nodeid" not in data:
         return {"status": "error", "msg": "Missing field \'nodeid\'", "code": erreursClient.MANQUE_CHAMP_REQUETE.value}
@@ -271,16 +287,16 @@ def work4node():
                     work = tacheCalcul(work)
                 break
             else:
-                print("Travail {} sauté car déjà existant ou None".format(work))
+                pass
+                #print("Travail {} sauté car déjà existant ou None".format(work))
                 
 
     if work:
-        mon_noeud.statut = statutNoeud.ACTIF
-        mon_noeud.tache_calcul = work
+        mon_noeud.charger_tache(work)
 
         # On est obligé de faire comme ça pour pouvoir spécifier l'encodeur par défaut
         response.headers['Content-Type'] = 'application/json'
-        return json.dumps({"status": "ok", "msg": "Successfully allocated work", "code": erreursClient.PAS_ERREUR.value, "task-payload": work.versdict()}, default=str)
+        return json.dumps({"status": "ok", "msg": "Successfully allocated work", "code": erreursClient.PAS_ERREUR.value, "task-payload": work.versdict()}, default=lambda x: x.value)
     else:
         # Là on n'a plus de tâches rejetées à refaire et la séquence est épuisée :/
         # On commence à "cannibaliser" les tâches en donnant les tâches les plus anciennes$ aux nouveaux arrivants
@@ -356,8 +372,10 @@ def work4node():
             # Met à jour la date de dernière allocation
             print("Cannibalisation de {}".format(tache_ancienne))
             tache_ancienne.realloc()
+            mon_noeud.charger_tache(tache_ancienne)
+
             response.headers['Content-Type'] = 'application/json'
-            return json.dumps({"status": "ok", "msg": "Successfully allocated work", "code": erreursClient.PAS_ERREUR.value, "task-payload": tache_ancienne.versdict()}, default=str)
+            return json.dumps({"status": "ok", "msg": "Successfully allocated work", "code": erreursClient.PAS_ERREUR.value, "task-payload": tache_ancienne.versdict()}, default=lambda x: x.value)
 
 
 
@@ -370,7 +388,7 @@ def submit_results():
         return s[1]
     
     data = dict(s[1])
-    client = sessions_maitres[int(data["mastertoken"])]
+    client = sessions_maitres[data["mastertoken"]]
 
     if "nodeid" not in data:
         return {"status": "error", "msg": "Missing field \'nodeid\'", "code": erreursClient.MANQUE_CHAMP_REQUETE.value}
@@ -389,7 +407,7 @@ def submit_results():
         return {"status": "error", "msg": "Node is not active ! (status {})".format(mon_noeud.statut), "code": erreursClient.MAUVAIS_STATUT_NOEUD.value}
 
     resultats = data["payload"]
-    print("Résultats du noeud {}: {}".format(nodeid, resultats))
+    #print("Résultats du noeud {}: {}".format(nodeid, resultats))
 
     # Quoi qu'il arrive, on retire la tâche au noeud: 
     #   -> si c'est OK, tant mieux
@@ -433,7 +451,7 @@ def drop_task():
         return s[1]
     
     data = dict(s[1])
-    client = sessions_maitres[int(data["mastertoken"])]
+    client = sessions_maitres[data["mastertoken"]]
 
     if "nodeid" not in data:
         return {"status": "error", "msg": "Missing field \'nodeid\'", "code": erreursClient.MANQUE_CHAMP_REQUETE.value}
@@ -490,7 +508,7 @@ def unregister_master():
     
     data = dict(s[1])
 
-    client = sessions_maitres[int(data["mastertoken"])]
+    client = sessions_maitres[data["mastertoken"]]
     nom = client.nom
     for noeud in client.noeuds.values():
         noeud.abandonner_tache()

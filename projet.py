@@ -14,8 +14,10 @@ class projetCascada():
         self.facteur_selection = 0.01
         self.facteur_amplification = 1
         self.nb_densifications_effectuees = 0
-        self.ancien_sequenceur = None
+        self.ancien_sequenceur = None # utilisé pour la densification, pour savoir combien on avait d'itérations
+                                            # pour chaque variable
         self.execution_terminee = False
+        self.algo = "TESTING"
 
     def __str__(self):
         return self.nom

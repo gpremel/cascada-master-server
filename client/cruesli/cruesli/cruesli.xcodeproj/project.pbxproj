@@ -8,6 +8,14 @@
 
 /* Begin PBXBuildFile section */
 		F060C4D724CA014000D82E61 /* main.c in Sources */ = {isa = PBXBuildFile; fileRef = F060C4D624CA014000D82E61 /* main.c */; };
+		F060C4DF24CA018200D82E61 /* libcurl.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = F060C4DE24CA018200D82E61 /* libcurl.tbd */; };
+		F060C4E224CA019700D82E61 /* cruesli.c in Sources */ = {isa = PBXBuildFile; fileRef = F060C4E024CA019700D82E61 /* cruesli.c */; };
+		F060C4E524CA2C2800D82E61 /* safe_malloc.c in Sources */ = {isa = PBXBuildFile; fileRef = F060C4E424CA2C2800D82E61 /* safe_malloc.c */; };
+		F060C4E824CA2F3E00D82E61 /* util.c in Sources */ = {isa = PBXBuildFile; fileRef = F060C4E624CA2F3E00D82E61 /* util.c */; };
+		F060C4EA24CA335F00D82E61 /* libcjson.1.7.13.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = F060C4E924CA335F00D82E61 /* libcjson.1.7.13.dylib */; };
+		F060C4ED24CAD91600D82E61 /* vartable.c in Sources */ = {isa = PBXBuildFile; fileRef = F060C4EB24CAD91500D82E61 /* vartable.c */; };
+		F060C4F024CAECCD00D82E61 /* www.c in Sources */ = {isa = PBXBuildFile; fileRef = F060C4EE24CAECCD00D82E61 /* www.c */; };
+		F081E79B24CC993B003B50D2 /* libpthread.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = F081E79A24CC993B003B50D2 /* libpthread.tbd */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -25,6 +33,19 @@
 /* Begin PBXFileReference section */
 		F060C4D324CA014000D82E61 /* cruesli */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = cruesli; sourceTree = BUILT_PRODUCTS_DIR; };
 		F060C4D624CA014000D82E61 /* main.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = main.c; sourceTree = "<group>"; };
+		F060C4DE24CA018200D82E61 /* libcurl.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libcurl.tbd; path = usr/lib/libcurl.tbd; sourceTree = SDKROOT; };
+		F060C4E024CA019700D82E61 /* cruesli.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = cruesli.c; sourceTree = "<group>"; };
+		F060C4E124CA019700D82E61 /* cruesli.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = cruesli.h; sourceTree = "<group>"; };
+		F060C4E324CA2C1900D82E61 /* safe_malloc.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = safe_malloc.h; sourceTree = "<group>"; };
+		F060C4E424CA2C2800D82E61 /* safe_malloc.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = safe_malloc.c; sourceTree = "<group>"; };
+		F060C4E624CA2F3E00D82E61 /* util.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = util.c; sourceTree = "<group>"; };
+		F060C4E724CA2F3E00D82E61 /* util.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = util.h; sourceTree = "<group>"; };
+		F060C4E924CA335F00D82E61 /* libcjson.1.7.13.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libcjson.1.7.13.dylib; path = ../../../../../../../../usr/local/Cellar/cjson/1.7.13/lib/libcjson.1.7.13.dylib; sourceTree = "<group>"; };
+		F060C4EB24CAD91500D82E61 /* vartable.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = vartable.c; sourceTree = "<group>"; };
+		F060C4EC24CAD91500D82E61 /* vartable.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = vartable.h; sourceTree = "<group>"; };
+		F060C4EE24CAECCD00D82E61 /* www.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = www.c; sourceTree = "<group>"; };
+		F060C4EF24CAECCD00D82E61 /* www.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = www.h; sourceTree = "<group>"; };
+		F081E79A24CC993B003B50D2 /* libpthread.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libpthread.tbd; path = usr/lib/libpthread.tbd; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -32,6 +53,9 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				F081E79B24CC993B003B50D2 /* libpthread.tbd in Frameworks */,
+				F060C4EA24CA335F00D82E61 /* libcjson.1.7.13.dylib in Frameworks */,
+				F060C4DF24CA018200D82E61 /* libcurl.tbd in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -43,6 +67,7 @@
 			children = (
 				F060C4D524CA014000D82E61 /* cruesli */,
 				F060C4D424CA014000D82E61 /* Products */,
+				F060C4DD24CA018200D82E61 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -58,8 +83,28 @@
 			isa = PBXGroup;
 			children = (
 				F060C4D624CA014000D82E61 /* main.c */,
+				F060C4EE24CAECCD00D82E61 /* www.c */,
+				F060C4EF24CAECCD00D82E61 /* www.h */,
+				F060C4EB24CAD91500D82E61 /* vartable.c */,
+				F060C4EC24CAD91500D82E61 /* vartable.h */,
+				F060C4E624CA2F3E00D82E61 /* util.c */,
+				F060C4E724CA2F3E00D82E61 /* util.h */,
+				F060C4E324CA2C1900D82E61 /* safe_malloc.h */,
+				F060C4E424CA2C2800D82E61 /* safe_malloc.c */,
+				F060C4E024CA019700D82E61 /* cruesli.c */,
+				F060C4E124CA019700D82E61 /* cruesli.h */,
 			);
 			path = cruesli;
+			sourceTree = "<group>";
+		};
+		F060C4DD24CA018200D82E61 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				F081E79A24CC993B003B50D2 /* libpthread.tbd */,
+				F060C4E924CA335F00D82E61 /* libcjson.1.7.13.dylib */,
+				F060C4DE24CA018200D82E61 /* libcurl.tbd */,
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -119,6 +164,11 @@
 			buildActionMask = 2147483647;
 			files = (
 				F060C4D724CA014000D82E61 /* main.c in Sources */,
+				F060C4E824CA2F3E00D82E61 /* util.c in Sources */,
+				F060C4E224CA019700D82E61 /* cruesli.c in Sources */,
+				F060C4F024CAECCD00D82E61 /* www.c in Sources */,
+				F060C4ED24CAD91600D82E61 /* vartable.c in Sources */,
+				F060C4E524CA2C2800D82E61 /* safe_malloc.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -240,6 +290,11 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
+				HEADER_SEARCH_PATHS = /usr/local/include;
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					/usr/local/Cellar/cjson/1.7.13/lib,
+				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Debug;
@@ -248,6 +303,11 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
+				HEADER_SEARCH_PATHS = /usr/local/include;
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					/usr/local/Cellar/cjson/1.7.13/lib,
+				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Release;

@@ -11,4 +11,7 @@
 
 #include <stdio.h>
 
+char* strconc(char* str1, char* str2);
+
+
 #endif /* util_h */

@@ -17,8 +17,7 @@ schema_range = {"X": (-10, 10, 10, np.linspace), "Y": (-10, 10, 10, np.linspace)
 logging.basicConfig(filename='cascada.log', level=logging.INFO, format='%(levelname)s %(asctime)s %(message)s')
 
 mon_super_sequenceur = seq.sequenceur(schema, schema_range)
-print("Longueur séquenceur: {}".format(mon_super_sequenceur.nb_iters_total))
-mon_genial_projet = projet.projetCascada("Parcours_pentu", mon_super_sequenceur, {"d": vartypes.csc_float}, schema)
+mon_genial_projet = projet.projetCascada("Frangance_oubliee", mon_super_sequenceur, {"d": vartypes.csc_float}, schema)
 
 server.init(mon_genial_projet)
 server.launch()

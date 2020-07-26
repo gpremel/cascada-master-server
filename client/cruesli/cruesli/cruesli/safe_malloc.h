@@ -9,5 +9,7 @@
 #ifndef safe_malloc_h
 #define safe_malloc_h
 
+void* safe_malloc(size_t size);
+void die(char* message);
 
 #endif /* safe_malloc_h */

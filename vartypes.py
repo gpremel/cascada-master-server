@@ -53,12 +53,17 @@ class csc_printing_expanded(object):
     des propriétés d'affichage à d'autres types
     NE DOIT PAS ÊTRE INSTANCIÉE DIRECTEMENT"""
 
+    typecode = 0
 
     def __str__(self):
         return str(self.value) #"{}({})".format(self.__class__.__name__, self.value)
     
     def __repr__(self):
         return self.__str__()
+
+    @staticmethod
+    def get_typecode():
+        return typecode
 
 class csc_SQL_expanded(object):
     """Classe qui n'implémente qu'une unique fonction, qui vise à offrir une
@@ -70,6 +75,9 @@ class csc_SQL_expanded(object):
 
     
 class csc_uint64(csc_printing_expanded, ctypes.c_uint64, csc_arithm_expanded, csc_SQL_expanded):
+    
+    typecode = 2
+    
     @staticmethod
     def to_SQL_type():
         return "BIGINT(20) UNSIGNED"
@@ -84,6 +92,9 @@ class csc_uint64(csc_printing_expanded, ctypes.c_uint64, csc_arithm_expanded, cs
     
 
 class csc_int64(csc_printing_expanded, ctypes.c_int64, csc_arithm_expanded, csc_SQL_expanded):
+    
+    typecode = 6
+
     @staticmethod
     def to_SQL_type():
         return "BIGINT(20)"
@@ -97,6 +108,9 @@ class csc_int64(csc_printing_expanded, ctypes.c_int64, csc_arithm_expanded, csc_
 
 
 class csc_uint32(csc_printing_expanded, ctypes.c_uint32, csc_arithm_expanded, csc_SQL_expanded):
+    
+    typecode = 1
+    
     @staticmethod
     def to_SQL_type():
         return "INT(10) UNSIGNED"
@@ -110,6 +124,9 @@ class csc_uint32(csc_printing_expanded, ctypes.c_uint32, csc_arithm_expanded, cs
 
 
 class csc_int32(csc_printing_expanded, ctypes.c_uint32, csc_arithm_expanded, csc_SQL_expanded):
+
+    typecode = 5
+
     @staticmethod
     def to_SQL_type():
         return "INT(10)"
@@ -138,6 +155,9 @@ class csc_uint8(csc_printing_expanded, ctypes.c_uint8,  csc_arithm_expanded, csc
 
 
 class csc_float(csc_printing_expanded, ctypes.c_float, csc_arithm_expanded, csc_SQL_expanded):
+
+    typecode = 3
+
     @staticmethod
     def to_SQL_type():
         return "DOUBLE" # "FLOAT" -> pas le choix sinon MariaDB déconne et ne renvoit pas les bonnes valeurs
@@ -152,6 +172,9 @@ class csc_float(csc_printing_expanded, ctypes.c_float, csc_arithm_expanded, csc_
 
 
 class csc_double(csc_printing_expanded, ctypes.c_double, csc_arithm_expanded, csc_SQL_expanded):
+
+    typecode = 4
+
     @staticmethod
     def to_SQL_type():
         return "DOUBLE" # "DOUBLE"
@@ -216,3 +239,20 @@ def caster_depuis_schema(schema, valeurs):
         if var in valeurs:
             res[var] = typ(valeurs[var])
     return res
+
+def schema_vers_sch_typecode(schema):
+    """Permet de transformer les classes en leur typecode pour l'envoyer au client
+
+    Params:
+        schema (dict): le schéma
+
+    Returns:
+        dict: le schéma avec les classes remplacées par leur typecode
+
+    """
+
+    sch_typecode = {}
+    for n, c in schema.items():
+        sch_typecode[n] = c.typecode
+    
+    return sch_typecode

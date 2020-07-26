@@ -11,4 +11,12 @@
 
 #include <stdio.h>
 
+struct www_writestruct {
+    char* ptr;
+    size_t size;
+};
+
+typedef struct www_writestruct www_writestruct;
+size_t dl2string(char *ptr, size_t size, size_t nmemb, www_writestruct* writeinfo);
+
 #endif /* www_h */
