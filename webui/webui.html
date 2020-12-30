@@ -1,6 +1,6 @@
 <html>
     <head>
-        <title>Gestion de cascada</title>
+        <title>Cascada webUI</title>
         <meta charset='utf-8'>
         <link rel="icon" type="image/png" href="images/favicon-round.png">
         <link rel="stylesheet" type="text/css" href="webui.css">
@@ -21,7 +21,7 @@
         </div>
 
         <div id="erreur-cnx" style="display: none;">
-            <p>Connexion perdue</p>
+            <p>Connection lost</p>
         </div>
 
         <div id="arborescence-placement">
@@ -38,7 +38,7 @@
                     <div id="progress-counter"><a class="numerateur"></a> : <a class="denominateur"></a></div>
             </div>
             <div id="osack">
-                <a href='osack.html'>Licenses opensource</a>
+                <a href='osack.html'>Opensource licenses</a>
             <div></div>
         </footer>
 
@@ -56,15 +56,15 @@
 
                 columns: {
                         name: {
-                                title: 'Nom'
+                                title: 'Name'
                         },
                         statut: {
-                                title: 'Statut',
-                                defaultValue: 'INACTIF',
+                                title: 'Status',
+                                defaultValue: 'INACTIVE',
                                 noescape: true
                         },
                         tache: {
-                                title: 'Tâche'
+                                title: 'Task'
                         }
                     }
                 };
@@ -142,13 +142,13 @@
         function code_statut_noeud_vers_str(code){
             switch(code){
                 case 0:
-                    return "INACTIF";
+                    return "INACTIVE";
                 case 2:
-                    return "MORT";
+                    return "DEAD";
                 case 3:
-                    return "PAUSE";
+                    return "PAUSED";
                 case 4:
-                    return "ACTIF";
+                    return "ACTIVE";
                 default:
                     return "N/D";
             }

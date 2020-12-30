@@ -1,25 +1,35 @@
-"""Ici on définit l'objet séquenceur qui va nous permettre de générer des séries de données à fournir aux noeuds"""
+"""Here is defined the Sequenceur object that will enable us to
+    generate the data we'll send to the nodes"""
+
+from typing import Type, Dict, Tuple, Callable, Iterable
 
 import numpy as np
 
+from vartypes import csc_var, csc_float, csc_uint8
 
-from vartypes import *
-import server
 
-class sequenceur():
-    def __init__(self, schema={}, schema_compteurs={}):
-        """Initialise le sequenceur
+class Sequenceur():
+    def __init__(self, schema: Dict[str, Type[csc_var]] = {},
+                 schema_compteurs: Dict[str,
+                                        Tuple[float,
+                                              float,
+                                              int,
+                                              Callable[[float, float, int],
+                                                       Iterable[float]]]] = {}):
+        """Initializes the sequencer
             Params:
-                schema           (dict): le classique dictionnaire avec comme clef les noms des variables 
-                                            et comme valeur la classe de type
-                schema_compteurs (dict): plus subtile, dictionnaire avec comme clef le nom des variables
-                                            et comme valeur un quadruplet (debut, fin, nombre itérations, fct)
-                                            avec fct une fonction qui à (debut, fin, nombre itération) associe
-                                            le (a)range correspondant (c'est typiquement numpy.linspace)
-            Returns:
-                dict: le schéma de sortie, avec comme clef les noms des variables et comme valeurs des instances
-                        de type
-            """
+                schema: a dictionnary, which keys are the name of the variables, the values being
+                        the matching type's class
+                schema_compteurs: a dictionnary, with its keys being the name of the variables,
+                                  the associated values being a 4-value tuple:
+                                        - start
+                                        - end
+                                        - number of iterations
+                                        - fct
+                                    Where fct is a function that takes (start, end, number of
+                                    iterations) and returns the corresponding
+                                    range (eg numpy.linspace)
+        """
 
         self.nb_iters_realisees = 0
         self.schema = schema
@@ -28,7 +38,6 @@ class sequenceur():
 
         self.nb_iters_total = 0
 
-
         if len(schema_compteurs) > 0:
             self.nb_iters_total = 1
             for r in schema_compteurs.values():
@@ -36,91 +45,103 @@ class sequenceur():
 
         self.indices_courants = [0 for i in range(len(schema_compteurs))]
 
-        # espace_variable nous permet de "compacter" schema et schema_compteurs en un seul bloc.
-        # c'est un tableau contenant des sous-listes de taille 5
-        # Chaque sous-liste a cette structure
-        #   -> le nom de la variables
-        #   -> la classe décrivant son type
-        #   -> le quadruplet (debut, fin, nombre, fonction générant le range)
-        #   -> le range genéré
-        #   -> la valeur actuelle de la variable comme instance de son type
+        # espace_variable "shrinks" schema and schema_compteurs in a single block
+        # it's a list containing sublists made of 5 elements
+        # Each sublist has the following structure:
+        #  -> the name of the variable
+        #  -> the class describing its type
+        #  -> the 4-value tuple (start, end, count, fct)
+        #  -> the generated range
+        #  -> the value of the current variable (as an instance of its type)
 
         self.espace_variables = []
         for nom, vartype in self.schema.items():
             self.espace_variables.append([nom, vartype])
         for i in range(len(self.espace_variables)):
-            # on recast en liste car on va le modifier par la suite
-            self.espace_variables[i].append(list(self.schema_compteurs[self.espace_variables[i][0]]))
-            
+            self.espace_variables[i].append(
+                list(self.schema_compteurs[self.espace_variables[i][0]]))
+
             fct = self.espace_variables[i][2][3]
             deb = self.espace_variables[i][2][0]
             fin = self.espace_variables[i][2][1]
-            nb  = self.espace_variables[i][2][2]
+            nb = self.espace_variables[i][2][2]
 
-            # la première variable
+            # first variable
             self.espace_variables[i].append(fct(deb, fin, nb))
 
-            # expression un peu compliquée qui permet d'initialiser la valeur de la variable
-            # comme instance de son type
+            # initializes the variable as instance of its type
             self.espace_variables[i].append(self.espace_variables[i][1](deb))
 
-    def suivant(self):
-        """Permet de générer le nombre suivant dans la séquence"""
+    def suivant(self) -> Dict[str, csc_var]:
+        """Generates the next number in the sequence
+
+            Returns:
+                dict: the outgoing scheme, with its keys being the name of the variables and
+                        the values being a matching (value-wise)
+                    instances of their type
+        """
+
         if len(self.indices_courants) == 0 or self.a_deborde:
             return None
-        
-        # on propage la retenue
+
+        # propagates the carry
         i = 0
-        while i < len(self.indices_courants) and self.indices_courants[i] >= self.espace_variables[i][2][2]:
+        while i < len(
+            self.indices_courants) and \
+                self.indices_courants[i] >= self.espace_variables[i][2][2]:
             self.indices_courants[i] = 0
             i += 1
-            if i < len(self.indices_courants): self.indices_courants[i] += 1
-        
-        # on a fini d'itérer (on est à bloc) et tous les indices ont été rebasculés à 0
+            if i < len(self.indices_courants):
+                self.indices_courants[i] += 1
+
+        # we're done iterating and each index has been reseted to 0
         if i >= len(self.indices_courants):
             self.a_deborde = True
             return None
 
-        # on a propagé la retenue du rang 0 au rang i exclu, par ailleurs on sait qu'on n'est pas dans une
-        # situation de rebouclage: ainsi la variable la plus à droite n'a pas débordé, elle a simplement
-        # été incrémentée.
-        # on doit ainsi recalculer les variables de 0 à i INCLUS (comme i < dernier indice c'est bon)
-        for j in range(i+1):
-            caster = self.espace_variables[j][1]    # le type de la variable   
-            # la variable comme instance de son type vaut désormais la valeur prise par le range au nouvel indice
-            self.espace_variables[j][4] = caster(self.espace_variables[j][3][self.indices_courants[j]])
-        
+        # we've propagated the carry from index 0 to index i excluded; we know that we're not in a
+        # "loop-like" situation: the rightmost variable hasn't overflowed, it's simply been
+        # incremented. We therefore have to compute variables from 0 to i (INCLUDED)
+        # (as i < last index we're good)
+        for j in range(i + 1):
+            caster = self.espace_variables[j][1]    # the variable's type
+            # the variable as instance of its type is now equals to the value taken by
+            # the range at the same position
+            self.espace_variables[j][4] = caster(
+                self.espace_variables[j][3][self.indices_courants[j]])
 
-        # il ne reste plus qu'à générer le schéma de sortie
-        # pour ce faire on lit simplement l'espace de variables
+        # we just have to generate the outgoing scheme
+        # it's quite easy: we only have to read the variable space
         sch_sortie = {}
         for j in range(len(self.espace_variables)):
             sch_sortie[self.espace_variables[j][0]] = self.espace_variables[j][4]
-        
-        # enfin, on incrémente pour le tour suivant
+
+        # finally, we increment to loop
         self.indices_courants[0] += 1
         self.nb_iters_realisees += 1
 
         return sch_sortie
 
-    
-    def reset(self):
+    def reset(self) -> None:
+        """Resets the counter"""
         self.__init__(self.schema, self.schema_compteurs)
-    
-    def recharger_bornes_pas(self, bornes_pas):
-        """Permet de recharger les paramètres de bornes et de pas pour les variables spécifiées dans bornes_pas,
-        utilie pour densifier !
+
+    def recharger_bornes_pas(self, bornes_pas: Dict[str, Tuple[float, float, int]]) -> None:
+        """Reloads the limits and steps parameters for the variables specified in bornes_pas;
+        useful for densifying !
+
             Params:
-                bornes_pas (dict): Les clef sont les noms des variables à recharger, les valeurs un triplet:
-                        -> début
-                        -> fin
-                        -> nombre d'itérations
-            
+                bornes_pas: Keys are the names of the variables to be reloaded;
+                            values are a 3-element tuple:
+                    -> start
+                    -> end
+                    -> number of iterations
+
             Returns:
                 None
-            
+
             Notes:
-                Attention, cette fonciton réinitialise le compteur !
+                This function RESETS the counter !
         """
 
         for n, v in bornes_pas.items():
@@ -128,25 +149,30 @@ class sequenceur():
                 fct = self.schema_compteurs[n][3]
                 self.schema_compteurs[n] = (v[0], v[1], v[2], fct)
         self.reset()
-    
-    def nb_iters_pour_variable(self, nom_variable):
-        """Permet d'accéder proprement au nombre d'itération pour chaque variable
+
+    def nb_iters_pour_variable(self, nom_variable: str) -> int:
+        """Returns the number of iterations for the variable name nom_variable
+
             Params:
-                nom_variable (str): le nom de la variable
-                
+                nom_variable: the name of the variable
+
             Returns:
-                object: la valeur de la variable, None si elle n'existe pas"""
+                int: the number of iterations
+        """
+
         if nom_variable not in self.schema_compteurs:
             return None
         else:
             return self.schema_compteurs[nom_variable][2]
 
-    
 
 if __name__ == '__main__':
     schema = {"K": csc_float, "E": csc_uint8}
-    schema_compteurs = {"K": (0, 10, 11, np.linspace), "E": (0, 5, 6, np.linspace)} #{"K": range(0, 10), "E": range(0, 5, 1)}
-    S = sequenceur(schema, schema_compteurs)
+    schema_compteurs = {
+        "K": (
+            0, 10, 11, np.linspace), "E": (
+            0, 5, 6, np.linspace)}  # {"K": range(0, 10), "E": range(0, 5, 1)}
+    S = Sequenceur(schema, schema_compteurs)
     print(S.nb_iters_total)
     x = S.suivant()
     while x is not None:
