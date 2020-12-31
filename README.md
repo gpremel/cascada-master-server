@@ -162,6 +162,7 @@ my_project = ProjetCascada("Demo",
                             client_scheme,
                             "mE",
                             3, 0.04, 1,
+                            "password"
                             "aVeryEfficientAlgorithm")
 ```
 
@@ -176,9 +177,10 @@ There is quite a lot of parameters, so don't hesitate to take a look at the docu
 6. The number of iterations of the densification process that should be made. If set to 0, no densification will occur.
 7. The selection ratio
 8. The "zoom" factor used during the densification
-9. The name of the algorithm the program running on the slave server should
+9. The password the clients will use when connecting
+10. The name of the algorithm the program running on the slave server should
     use, which it may or may not do (the master server has no way to check)
-10. Not specified here, but a function used to validate the results coming from the client before saving them. If they fail the validation, the configuration will be reallocated. See the docstring for more details.
+11. Not specified here, but a function used to validate the results coming from the client before saving them. If they fail the validation, the configuration will be reallocated. See the docstring for more details.
 
 #### Launching the server
 
@@ -288,3 +290,4 @@ Below are listed possible improvements that could be done:
 - Implement a keepalive for the clients
 - Modify `db.py` to allow using SQLite instead of MySQL/MariaDB
 - When the server restarts after having started a task, it should resume from where it was, so as to avoid redoing any (potentially time-consumming) computation. While it is already the case, the server starts from zero and for each configuration generated it checks its existance in the database; if it already exists, the configuration is skipped and not handed to the clients. This is not a very efficient behavior: it can sometimes take several minutes for the server to reach its past position. While it is resuming, no client can connect. This does however works well if the databse if fragmented. A solution should be found to make the resuming process faster. This should be considered the top priority issue.
+- Allow the master server to allocate whole chunks of tasks to other, sub-master servers that could then distribute them to the slave servers to increase scalability.

@@ -32,6 +32,7 @@ my_project = ProjetCascada("Demo",
                            server_scheme,
                            "mE",
                            3, 0.04, 1,
+                           "mdp",
                            "aVeryEfficientAlgorithm")
 
 server.init(my_project)

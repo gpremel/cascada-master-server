@@ -32,6 +32,7 @@ from projet import ProjetCascada
 #                           server_scheme,
 #                           "densification_var",
 #                           1, 0.5, 2,
+#                           "password"
 #                           "algorithm")
 
 # RUN THE PROJECT

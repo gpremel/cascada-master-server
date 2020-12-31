@@ -13,6 +13,7 @@ class ProjetCascada():
                  schema_densification: Dict[str, Type[csc_var]],
                  var_densification: str, nb_densifications: int,
                  facteur_selection: float, facteur_amplification: float,
+                 password: str,
                  alogrithm: str = "UNKNOWN",
                  validateur_entree: Callable[[Dict[str, csc_var]], bool] = lambda x: True):
         """Initializes the cascada project
@@ -30,6 +31,7 @@ class ProjetCascada():
                 facteur_selection: the proportion of records to be kept during the densification
                 facteur_amplification: describe the "zoom" factor, ie by how the program is going
                                     to increase the scale around the most promising records
+                password: the password the client will have to give to connect to the server
                 algorithm: (optionnal) a simple string describing the algorithm used; will be sent
                                     to the client during the handshake process;
                                     defaults to "UNKNOWN"
@@ -52,6 +54,7 @@ class ProjetCascada():
         # to know how many iterations we made
         # for each variable
         self.execution_terminee = False
+        self.password = password
         self.algo = alogrithm
         self.valider = validateur_entree
 

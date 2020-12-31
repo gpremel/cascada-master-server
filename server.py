@@ -697,6 +697,7 @@ def init(projet: ProjetCascada) -> None:
     global maBDD
     global sequenceur
     global mon_projet
+    global clef_secrete
 
     logging.info("\n\n\n")
     logging.info("**** SERVER INITIALIZATION ****")
@@ -708,6 +709,7 @@ def init(projet: ProjetCascada) -> None:
 
     mon_projet = projet
     nom_projet = mon_projet.nom
+    clef_secrete = projet.password
     maBDD = db.controlleurBDD(nom_projet, mon_projet.schema_total(), "db_cred.json")
     sequenceur = mon_projet.sequenceur
 
