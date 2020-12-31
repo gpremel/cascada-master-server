@@ -222,7 +222,7 @@ It is powered by [Oleg Sklyanchuk's great TreeJS library](https://github.com/ole
 
 ![Cascada's webUI, running a demo project](media/cascada_webui.png)
 
-In this example, there are two slave servers connected (`HPGuillaume` and `iMacdeGuillaume.local`), with respectively 4 and 8 nodes.
+In this example, there are two slave servers connected (`HPGuillaume` and `iMacdeGuillaume.local`), running on two different computers, with respectively 4 and 8 nodes.
 
 
 
